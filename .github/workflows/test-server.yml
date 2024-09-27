@@ -1,0 +1,43 @@
+name: Validate Node.js Server
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-server:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the repository
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Step 2: Set up Node.js environment
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 'lts/*'
+
+    # Step 3: Install dependencies
+    - name: Install dependencies
+      run: npm install
+
+    # Step 4: Start the server in the background
+    - name: Start the server
+      run: |
+        nohup npm start &
+        sleep 5 # Give the server some time to start
+
+    # Step 5: Validate the server is running (by making an HTTP request)
+    - name: Check if server is running
+      run: |
+        curl --fail http://localhost:3000 || (echo "Server is not running" && exit 1)
+
+    # Optional: Run additional tests
+    - name: Run test suite (optional)
+      run: npm test
